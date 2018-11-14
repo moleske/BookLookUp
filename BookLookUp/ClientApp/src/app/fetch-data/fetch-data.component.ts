@@ -1,30 +1,34 @@
 import {Component, Inject} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
+import {HttpClient, HttpParams} from '@angular/common/http';
 
 @Component({
   selector: 'app-fetch-data',
   templateUrl: './fetch-data.component.html'
 })
 export class FetchDataComponent {
-  public forecasts: WeatherForecast[];
-  private bookString: string;
+  public bookDetail: BookDetail;
+  private isbn: string;
+  private httpClient: HttpClient;
+  private baseUrl: string;
 
   constructor(http: HttpClient, @Inject('BASE_URL') baseUrl: string) {
-    http.get<WeatherForecast[]>(baseUrl + 'api/SampleData/WeatherForecasts').subscribe(result => {
-      this.forecasts = result;
-    }, error => console.error(error));
-
-    http.get<string>(baseUrl + "api/SampleData/BookDetailses").subscribe(result => {
-      this.bookString = result;
-    })
+    this.httpClient = http;
+    this.baseUrl = baseUrl;
+    this.bookDetail = {
+      bib_key: '',
+      thumbnail_url: '',
+      preview_url: '',
+      preview: '',
+      info_url: ''
+    };
   }
-}
 
-interface WeatherForecast {
-  dateFormatted: string;
-  temperatureC: number;
-  temperatureF: number;
-  summary: string;
+  onSubmit() {
+    const params = new HttpParams().set('isbn', this.isbn);
+    this.httpClient.get<BookDetail>(this.baseUrl + 'api/SampleData/BookDetailses', {params}).subscribe(result => {
+      this.bookDetail = result;
+    });
+  }
 }
 
 interface BookDetail {
